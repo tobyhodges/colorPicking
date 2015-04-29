@@ -14,9 +14,9 @@ def generate_color_range(N, I):
 	RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
 	for_conversion = []
 	for RGB_tuple in RGB_tuples:
-		for_conversion.append((RGB_tuple[0]*255, RGB_tuple[1]*255, RGB_tuple[2]*255))
+		for_conversion.append((int(RGB_tuple[0]*255), int(RGB_tuple[1]*255), int(RGB_tuple[2]*255)))
 	hex_colors = [ rgb_to_hex(RGB_tuple) for RGB_tuple in for_conversion ]
-	return hex_colors
+	return hex_colors, for_conversion
 
 # convert RGB tuple to hexadecimal code
 def rgb_to_hex(rgb):
@@ -89,10 +89,10 @@ callback.args['blue_slider'] = blue_slider
 brightness = 0.8 # at the moment this is hard-coded. Change if you want brighter/darker colors
 crx = range(1,1001) # the resolution is 1000 colors
 cry = [ 5 for i in range(len(crx)) ]
-crcolor = generate_color_range(1000,brightness) # produce spectrum
+crcolor, crRGBs = generate_color_range(1000,brightness) # produce spectrum
 
 # make data source object to allow information to be displayed by hover tool
-crsource = bkplt.ColumnDataSource(data=dict(x = crx, y = cry, crcolor = crcolor))
+crsource = bkplt.ColumnDataSource(data=dict(x = crx, y = cry, crcolor = crcolor, RGBs = crRGBs))
 
 tools2 = 'reset, save, hover'
 
@@ -101,7 +101,10 @@ p2 = bkplt.figure(x_range=(0,1000), y_range=(0,10), plot_width=600, plot_height=
 color_range1 = p2.rect(x='x', y='y', width=1, height=10, color='crcolor', source=crsource)
 # set up hover tool to show color hex code and sample swatch
 hover = p2.select(dict(type=HoverTool))
-hover.tooltips = [('color', '$color[hex, swatch]:crcolor')]
+hover.tooltips = [
+				   ('color', '$color[hex, rgb, swatch]:crcolor'),
+				   ('RGB levels', '@RGBs')
+				 ]
 
 # get rid of axis details for cleaner look
 p1.ygrid.grid_line_color = None
