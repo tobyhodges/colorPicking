@@ -122,8 +122,8 @@ p2.axis.major_tick_line_color = None
 p2.axis.minor_tick_line_color = None
 
 layout = bkplt.hplot(
-    vform(red_slider, green_slider, blue_slider),
-    vform(p1, p2)
+	vform(red_slider, green_slider, blue_slider),
+	vform(p1, p2)
 )
 
 bkplt.output_file("colourPicker.html")
