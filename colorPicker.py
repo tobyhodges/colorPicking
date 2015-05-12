@@ -1,6 +1,3 @@
-#! /usr/bin/env python
-
-import numpy as np
 from bokeh import plotting as bkplt
 from bokeh.models import LinearColorMapper, HoverTool, TapTool
 from bokeh.models.actions import Callback
@@ -8,7 +5,7 @@ from bokeh.models.widgets import Slider
 from bokeh.io import vform
 import colorsys
 
-# create colour spectrum of resolution N and brightness I, return as list of decimal RGB value tuples
+# for plot 2: create colour spectrum of resolution N and brightness I, return as list of decimal RGB value tuples
 def generate_color_range(N, I):
 	HSV_tuples = [ (x*1.0/N, 0.5, I) for x in range(N) ]
 	RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
@@ -29,6 +26,7 @@ def hex_to_dec(hex):
 	blue = ''.join(hex.strip('#')[4:6])
 	return (int(red, 16), int(green, 16), int(blue,16))
 
+# plot 1: create a color block with RGB values adjusted with sliders
 # initialise a white block for the first plot
 x = [0]
 y = [0]
@@ -51,6 +49,8 @@ color_block = p1.rect(x='x', y='y', width=18, height=10, fill_color='color', lin
 hex_code_text = p1.text('x', 'y', text='color', text_color='text_color', alpha=0.6667, text_font_size='36pt', text_baseline='middle', text_align='center', source=source)
 
 # the callback function to update the color of the block and associated label text
+# NOTE: the JS functions for converting RGB to hex are taken from the excellent answer
+# by Tim Down at http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 callback = Callback(args=dict(source=source), code="""
 	function componentToHex(c) {
 		var hex = c.toString(16);
@@ -86,6 +86,7 @@ callback.args['red_slider'] = red_slider
 callback.args['green_slider'] = green_slider
 callback.args['blue_slider'] = blue_slider
 
+# plot 2: create a color spectrum with a hover-over tool to inspect hex codes
 brightness = 0.8 # at the moment this is hard-coded. Change if you want brighter/darker colors
 crx = range(1,1001) # the resolution is 1000 colors
 cry = [ 5 for i in range(len(crx)) ]
@@ -97,7 +98,7 @@ crsource = bkplt.ColumnDataSource(data=dict(x = crx, y = cry, crcolor = crcolor,
 tools2 = 'reset, save, hover'
 
 # create second plot
-p2 = bkplt.figure(x_range=(0,1000), y_range=(0,10), plot_width=600, plot_height=150, tools=tools2, title = 'pick color')
+p2 = bkplt.figure(x_range=(0,1000), y_range=(0,10), plot_width=600, plot_height=150, tools=tools2, title = 'hover over color')
 color_range1 = p2.rect(x='x', y='y', width=1, height=10, color='crcolor', source=crsource)
 # set up hover tool to show color hex code and sample swatch
 hover = p2.select(dict(type=HoverTool))
@@ -126,5 +127,5 @@ layout = bkplt.hplot(
 	vform(p1, p2)
 )
 
-bkplt.output_file("colourPicker.html")
+bkplt.output_file("colorSliders.html")
 bkplt.show(layout)
